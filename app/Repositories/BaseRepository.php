@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Exception;
 
 
@@ -21,6 +22,39 @@ class BaseRepository
     public function __construct(Model $model)
     {
         $this->model = $model;
+    }
+
+    /**
+     * データを取得
+     *
+     * @param int|array $value
+     * @param string $key
+     * @return ?Model
+     */
+    public function getBy(int|array $value): ?Model
+    {
+        $query = $this->model->query();
+
+        // キーが指定されていない場合はID検索
+        if (is_int($value) && empty($key)) {
+            return $query->find($value);
+        }
+
+        // 配列の場合は絞り込んで一意に
+        foreach ($value as $key => $val) {
+            $query->where($key, $value);
+        }
+        return $query->first();
+    }
+
+    /**
+     * データを全て取得
+     *
+     * @return Collection
+     */
+    public function getAll(): Collection
+    {
+        return $this->model->get();
     }
 
     /**
