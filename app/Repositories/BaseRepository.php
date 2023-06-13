@@ -103,4 +103,49 @@ class BaseRepository
             throw $e;
         }
     }
+
+    /**
+     * Bulk insert
+     *
+     * @param array $data
+     * @return void
+     */
+    public function bulkInsert(array $data): void
+    {
+        try {
+            // Get all columns of the table.
+            $table = $this->model->getTable();
+            $columns = $this->model->getConnection()->getSchemaBuilder()->getColumnListing($table);
+
+            // Get current datetime for created_at/updated_at.
+            $timestamp = Carbon::now();
+
+            // Unset columns if not exists in the table.
+            foreach ($data as $index => $attributes) {
+                // Unset items if not defined in the table.
+                foreach ($attributes as $key => $value) {
+                    if (!in_array($key, $columns)) {
+                        unset($attributes[$key]);
+                    }
+                }
+
+                foreach ($columns as $column) {
+                    // Set timestamp for created_at/updated_at.
+                    if ($column === 'created_at' || $column === 'updated_at') {
+                        $data[$key][$column] = $timestamp;
+                    }
+
+                    // Set null to columns if not set in $attributes.
+                    if (!array_key_exists($column, $attributes) && !in_array($column, $this->model->getGuarded())) {
+                        $data[$index][$column] = null;
+                    }
+                }
+            }
+
+            // Insert all data.
+            $this->model->insert($data);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }

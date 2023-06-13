@@ -9,6 +9,8 @@ class Timeline extends Model
 {
     use HasFactory;
 
+    // guarded attributes
+    protected $guarded = ['id'];
 
     public function lifeEvents()
     {

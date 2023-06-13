@@ -59,4 +59,26 @@ class TimelineController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * Create a new record of the timeline.
+     *
+     * @param TimelineRequest $request
+     * @param integer|null $timeline_id
+     * @return JsonResponse
+     */
+    public function store(TimelineRequest $request, ?int $timeline_id = null): JsonResponse
+    {
+        try {
+            // Get all request parameters.
+            $inputs = $request->all();
+
+            // Create a new record of the timeline.
+            $timeline = $this->timelineService->store($inputs);
+
+            return response()->json($timeline);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }

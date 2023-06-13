@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class LifeEvent extends Model
 {
     use HasFactory;
+
+    // guarded attributes
+    protected $guarded = [
+        'id',
+    ];
 }
