@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 abstract class BaseFormRequest extends FormRequest
 {
     /**
-     * バリデーションエラー返却
+     * Return validation messages.
      *
      * @param Validator $validator
      * @return void

@@ -2,20 +2,17 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Exception;
 
-
-/**
- * 共通DB処理
- */
 class BaseRepository
 {
     protected Model $model;
 
     /**
-     * コンストラクタ
+     * Construct
      *
      * @param Model $model
      */
@@ -25,7 +22,7 @@ class BaseRepository
     }
 
     /**
-     * データを取得
+     * Get data by a key.
      *
      * @param int|array $value
      * @param string $key
@@ -35,12 +32,11 @@ class BaseRepository
     {
         $query = $this->model->query();
 
-        // キーが指定されていない場合はID検索
-        if (is_int($value) && empty($key)) {
+        // Find data by primary key if $value is integer.
+        if (is_int($value)) {
             return $query->find($value);
         }
 
-        // 配列の場合は絞り込んで一意に
         foreach ($value as $key => $val) {
             $query->where($key, $value);
         }
@@ -48,47 +44,47 @@ class BaseRepository
     }
 
     /**
-     * データを全て取得
+     * Get all data.
      *
-     * @return Collection
+     * @return Collection|null
      */
-    public function getAll(): Collection
+    public function getAll(): ?Collection
     {
         return $this->model->get();
     }
 
     /**
-     * 登録・更新処理
+     * Insert or update data.
      *
      * @param array $attributes
-     * @return mixed
+     * @return Model|integer
      */
-    public function save(array $attributes): mixed
+    public function save(array $attributes): Model|int
     {
         try {
-            // カラム情報を取得
+            // Get all columns of the table.
             $table = $this->model->getTable();
             $columns = $this->model->getConnection()->getSchemaBuilder()->getColumnListing($table);
 
-            // テーブルに存在しないカラムは削除
+            // Unset columns if not exists in the table.
             foreach ($attributes as $key => $value) {
                 if (!in_array($key, $columns)) {
                     unset($attributes[$key]);
                 }
             }
 
-            // 更新処理の場合
+            // Update
             if (isset($attributes['id'])) {
-                // idを更新用の項目値から削除
+                // unset 'id' from $attributes.
                 $id = $attributes['id'];
                 unset($attributes['id']);
 
-                // クエリ生成
+                // Create a query
                 $query = $this->model->where('id', $id);
 
-                // 更新日時が項目値に存在する場合は排他チェック
+                // Exclusive check if 'updated_at' exists in $attributes.
                 if (isset($attributes['updated_at'])) {
-                    // データから更新日時の取得
+                    // Get 'updated_at' of the registed data record.
                     $updated_at = clone $query->first('updated_at')->updated_at;
 
                     if ($updated_at !== $attributes['updated_at']) {
@@ -97,11 +93,11 @@ class BaseRepository
                     }
                 }
 
-                // データ更新
+                // Update the data record with $attributes.
                 return $query->update($attributes);
             }
 
-            // データ登録
+            // Insert
             return $this->model->create($attributes);
         } catch (Exception $e) {
             throw $e;

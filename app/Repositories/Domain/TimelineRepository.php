@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class TimelineRepository extends BaseRepository
 {
     /**
-     * コンストラクタ
+     * Construct
      *
      * @param Timeline $model
      */
@@ -19,7 +19,7 @@ class TimelineRepository extends BaseRepository
     }
 
     /**
-     * 年表詳細を年表IDから取得
+     * Get details of the selected timeline.
      *
      * @param integer $timeline_id
      * @return Collection
@@ -27,7 +27,7 @@ class TimelineRepository extends BaseRepository
     public function getTimeline(int $timeline_id): Collection
     {
         return $this->model->with([
-            // 年表イベントの取得
+            // Get related data from life_events table.
             'lifeEvents' => function ($query) {
                 $query->orderBy('age', 'ASC');
             }

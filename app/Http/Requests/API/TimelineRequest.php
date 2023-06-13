@@ -11,7 +11,7 @@ class TimelineRequest extends BaseFormRequest
     protected TimelineRepository $timelineRepository;
 
     /**
-     * コンストラクタ
+     * Construct
      *
      * @param TimelineRepository $timelineRepository
      */
@@ -36,7 +36,7 @@ class TimelineRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'number|required',
+            'user_id' => 'numeric|required',
             'title' => 'string|required|max:100',
             'description' => 'string',
             'life_events' => 'required',
@@ -48,24 +48,24 @@ class TimelineRequest extends BaseFormRequest
     }
 
     /**
-     * 追加バリデーション処理
+     * Additional validation
      *
      * @param Validator $validator
      * @return void
      */
     public function withValidator(Validator $validator)
     {
-        // 新規登録の場合
+        // No further validation when it is for the new data entry.
         if ($this->input('timeline_id') === null) {
             return;
         }
 
-        // 更新の場合はデータの存在チェック
+        // Check if the data record exists when the update.
         $validator->after(function ($validator) {
-            // 年表テーブルからデータを取得
+            // Retrieve data from Timelines table by timeline_id.
             $data = $this->timelineRepository->getBy($this->input('timeline_id'));
 
-            // データが存在しない場合はバリデーションメッセージを返却
+            // return an error message.
             if (is_null($data)) {
                 $validator->errors()->add('timeline_id', '年表がすでに削除されています。');
             }

@@ -3,49 +3,60 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Domain\TimelineRepository;
+use App\Services\API\TimelineService;
+use App\Http\Requests\API\TimelineRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\Entity\Timeline;
+use Exception;
 
 class TimelineController extends Controller
 {
-    protected TimelineRepository $timelineRepository;
+    protected TimelineService $timelineService;
 
     /**
-     * コンストラクタ
+     * Construct
      *
-     * @param TimelineRepository $timelineRepository
+     * @param TimelineService $timelineService
      */
-    public function __construct(TimelineRepository $timelineRepository)
+    public function __construct(TimelineService $timelineService)
     {
-        $this->timelineRepository = $timelineRepository;
+        $this->timelineService = $timelineService;
     }
 
     /**
-     * 人生年表のリストを取得
+     * Get a list of timelines.
      *
      * @param Request $request
      * @return JsonResponse
      */
-    public function getTimelines(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        // 年表一覧を取得
-        $timelines = Timeline::get();
+        try {
+            // Get a list of timelines.
+            $timelines = $this->timelineService->getAll();
 
-        return response()->json($timelines);
+            return response()->json($timelines);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     /**
-     * 人生年表の詳細を取得
+     * Get details of the timeline.
      *
      * @param Request $request
      * @param integer $timeline_id
      * @return JsonResponse
      */
-    public function getTimeline(Request $request, int $timeline_id): JsonResponse
+    public function show(Request $request, int $timeline_id): JsonResponse
     {
-        $timeline = $this->timelineRepository->getTimeline($timeline_id);
-        return response()->json($timeline);
+        try {
+            // Get details of the timeline.
+            $timeline = $this->timelineService->getTimeline($timeline_id);
+
+            return response()->json($timeline);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 }

@@ -19,9 +19,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Timeline
 Route::controller(TimelineController::class)->group(function () {
-    // 年表のリストを取得
-    Route::get('/getTimelines', 'getTimelines')->name('getTimelines');
-    // 年表詳細を取得
-    Route::get('/getTimeline/{timeline_id}', 'getTimeline')->name('getTimeline');
+    // Get a list of timelines
+    Route::get('/timeline', 'index')->name('timeline.index');
+    // Get details of the timeline
+    Route::get('/timeline/{timeline_id}', 'show')->name('timeline.show');
+    // Create a new record of the timeline
+    Route::post('/timeline', 'store')->name('timeline.store');
+    // Update the record of the timeline
+    Route::put('/timeline', 'update')->name('timeline.update');
+    // Delete the record of the timeline
+    Route::delete('/timeline', 'destroy')->name('timeline.destroy');
 });
