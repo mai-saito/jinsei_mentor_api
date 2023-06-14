@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Exceptions\ExclusiveLockException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -88,8 +89,8 @@ class BaseRepository
                     $updated_at = clone $query->first('updated_at')->updated_at;
 
                     if ($updated_at !== $attributes['updated_at']) {
-                        // TODO: 排他チェック用例外作成
-                        throw new Exception('排他チェック');
+                        // Throw ExclusiveLockException if these updated_at do not match.
+                        throw new ExclusiveLockException();
                     }
                 }
 
