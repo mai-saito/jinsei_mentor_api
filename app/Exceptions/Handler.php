@@ -37,15 +37,11 @@ class Handler extends ExceptionHandler
 
                 // Exclusive lock exception (status: 409).
                 if ($e instanceof ExclusiveLockException) {
-                    return response()->json([
-                        'message' => $e->getMessage() ? $e->getMessage() : 'Exculive lock error.',
-                    ], Response::HTTP_CONFLICT);
+                    return response()->error(Response::HTTP_CONFLICT, $e->getMessage() ?? 'Exculive lock error.');
                 }
 
                 // Server error (status: 500).
-                return response()->json([
-                    'message' => $e->getMessage() ? $e->getMessage() : 'Internal server error.',
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->error(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage() ?? 'Internal server error.');
             }
         });
     }
