@@ -22,26 +22,42 @@ class BaseRepository
         $this->model = $model;
     }
 
+    // /**
+    //  * Get data by a key.
+    //  *
+    //  * @param int|array $value
+    //  * @return ?Model
+    //  */
+    // public function getBy(int|array $value): ?Model
+    // {
+    //     $query = $this->model->query();
+
+    //     // Find data by primary key if $value is integer.
+    //     if (is_int($value)) {
+    //         return $query->find($value);
+    //     }
+
+    //     foreach ($value as $key => $val) {
+    //         $query->where($key, $value);
+    //     }
+    //     return $query->first();
+    // }
+
     /**
-     * Get data by a key.
+     * Check if the data exists.
      *
-     * @param int|array $value
-     * @param string $key
-     * @return ?Model
+     * @param array $attributes
+     * @return bool
      */
-    public function getBy(int|array $value): ?Model
+    public function exists(array $attributes): bool
     {
         $query = $this->model->query();
 
-        // Find data by primary key if $value is integer.
-        if (is_int($value)) {
-            return $query->find($value);
-        }
-
-        foreach ($value as $key => $val) {
+        foreach ($attributes as $key => $value) {
             $query->where($key, $value);
         }
-        return $query->first();
+
+        return $query->exists();
     }
 
     /**
@@ -133,7 +149,7 @@ class BaseRepository
                 foreach ($columns as $column) {
                     // Set timestamp for created_at/updated_at.
                     if ($column === 'created_at' || $column === 'updated_at') {
-                        $data[$key][$column] = $timestamp;
+                        $data[$index][$column] = $timestamp;
                     }
 
                     // Set null to columns if not set in $attributes.
@@ -145,6 +161,47 @@ class BaseRepository
 
             // Insert all data.
             $this->model->insert($data);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Bulk Upsert
+     *
+     * @param array $data
+     * @param array $keys
+     * @return int
+     */
+    public function bulkUpsert(array $data, array $keys): int
+    {
+        try {
+            // Get all columns of the table.
+            $table = $this->model->getTable();
+            $columns = $this->model->getConnection()->getSchemaBuilder()->getColumnListing($table);
+
+            // Get current datetime for created_at/updated_at.
+            $timestamp = Carbon::now();
+
+            // Unset columns if not exists in the table.
+            foreach ($data as $index => $attributes) {
+                // Unset items if not defined in the table.
+                foreach ($attributes as $key => $value) {
+                    if (!in_array($key, $columns)) {
+                        unset($data[$index][$key]);
+                    }
+                }
+
+                foreach ($columns as $column) {
+                    // Set timestamp for created_at/updated_at.
+                    if ($column === 'created_at' || $column === 'updated_at') {
+                        $data[$index][$column] = $timestamp;
+                    }
+                }
+            }
+
+            // Upsert all data.
+            return $this->model->upsert($data, $keys);
         } catch (Exception $e) {
             throw $e;
         }

@@ -83,4 +83,43 @@ class TimelineService extends BaseService
             throw $e;
         }
     }
+
+    /**
+     * Update the record of the timeline.
+     *
+     * @param integer $timeline_id
+     * @param array $inputs
+     * @return void
+     */
+    public function update(int $timeline_id, array $attributes): void
+    {
+        try {
+            // Format data for life_events.
+            $life_events_attributes = !empty($attributes['life_events']) ? $attributes['life_events'] : null;
+
+            // Format data for timelines.
+            unset($attributes['life_events']);
+            $attributes['id'] = $timeline_id;
+
+            // Transaction starts.
+            DB::beginTransaction();
+
+            // Update the timeline.
+            $this->timelineRepository->save($attributes);
+
+            // Set id, timeline_id to attributes of life_events.
+            $life_events_attributes = array_map(function ($data) use ($timeline_id) {
+                $data['timeline_id'] = $timeline_id;
+                return $data;
+            }, $life_events_attributes);
+
+            // Upsert data into life_events.
+            $this->lifeEventRepository->bulkUpsert($life_events_attributes, ['timeline_id', 'age']);
+
+            // Transaction ends.
+            DB::commit();
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }

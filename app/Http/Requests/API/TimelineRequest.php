@@ -37,12 +37,12 @@ class TimelineRequest extends BaseFormRequest
     {
         return [
             'user_id' => 'numeric|required',
-            'title' => 'string|required|max:100',
+            'title' => 'string|required_if:timeline_id,null|max:100',
             'description' => 'string',
             'life_events' => 'required',
-            'life_events.*.title' => 'string|required|max:100',
+            'life_events.*.title' => 'string|max:100',
             'life_events.*.description' => 'string',
-            'life_events.*.slug' => 'string|required|max:20',
+            'life_events.*.slug' => 'string|max:20',
             'life_events.*.age' => 'int|required',
         ];
     }
@@ -63,7 +63,7 @@ class TimelineRequest extends BaseFormRequest
         // Check if the data record exists when the update.
         $validator->after(function ($validator) {
             // Retrieve data from Timelines table by timeline_id.
-            $data = $this->timelineRepository->getBy($this->input('timeline_id'));
+            $data = $this->timelineRepository->exists(['id' => $this->input('timeline_id')]);
 
             // return an error message.
             if (is_null($data)) {

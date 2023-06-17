@@ -14,7 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            TimelineSeeder::class
+            TimelineSeeder::class,
+            LifeEventSeeder::class
         ]);
     }
 }

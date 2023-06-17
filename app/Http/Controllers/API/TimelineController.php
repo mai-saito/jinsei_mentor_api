@@ -64,10 +64,9 @@ class TimelineController extends Controller
      * Create a new record of the timeline.
      *
      * @param TimelineRequest $request
-     * @param integer|null $timeline_id
      * @return JsonResponse
      */
-    public function store(TimelineRequest $request, ?int $timeline_id = null): JsonResponse
+    public function store(TimelineRequest $request): JsonResponse
     {
         try {
             // Get all request parameters.
@@ -75,6 +74,28 @@ class TimelineController extends Controller
 
             // Create a new record of the timeline.
             $timeline = $this->timelineService->store($inputs);
+
+            return response()->json($timeline);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Update the record of the timeline.
+     *
+     * @param TimelineRequest $request
+     * @param integer $timeline_id
+     * @return JsonResponse
+     */
+    public function update(TimelineRequest $request, int $timeline_id): JsonResponse
+    {
+        try {
+            // Get all request parameters.
+            $inputs = $request->all();
+
+            // Create a new record of the timeline.
+            $timeline = $this->timelineService->update($timeline_id, $inputs);
 
             return response()->json($timeline);
         } catch (Exception $e) {

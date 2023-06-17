@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('age')->length(2)->comment('年齢');
             $table->timestamps();
             $table->comment('年表イベントテーブル');
+            $table->unique(['timeline_id', 'age']);
         });
     }
 
