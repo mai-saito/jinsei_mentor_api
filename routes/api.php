@@ -30,5 +30,5 @@ Route::controller(TimelineController::class)->group(function () {
     // Update the record of the timeline
     Route::put('/timeline/{timeline_id}', 'update')->name('timeline.update');
     // Delete the record of the timeline
-    Route::delete('/timeline/{timeline_id}', 'destroy')->name('timeline.destroy');
+    Route::delete('/timeline/{timeline_id}', 'delete')->name('timeline.destroy');
 });

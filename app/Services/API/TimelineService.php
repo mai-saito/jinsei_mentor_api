@@ -80,6 +80,8 @@ class TimelineService extends BaseService
 
             return $timeline;
         } catch (Exception $e) {
+            // Rollback
+            DB::rollBack();
             throw $e;
         }
     }
@@ -119,6 +121,45 @@ class TimelineService extends BaseService
             // Transaction ends.
             DB::commit();
         } catch (Exception $e) {
+            // Rollback
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete timelines and related life_events.
+     *
+     * @param integer $timeline_id
+     * @param array $attributes
+     * @return void
+     */
+    public function delete(int $timeline_id, array $attributes): void
+    {
+        try {
+            // Transaction starts.
+            DB::beginTransaction();
+
+            // Delete the timeline.
+            $this->timelineRepository->delete($timeline_id, $attributes['updated_at']);
+
+            // Retrive related life_events.
+            $life_events = $this->lifeEventRepository->getByTimelineId($timeline_id);
+
+            // Convert $life_events for deletion.
+            $ids = [];
+            foreach ($life_events->toArray() as $index => $value) {
+                $ids[$index]['id'] = $value->id;
+            }
+
+            // Delete all life_events.
+            $this->lifeEventRepository->bulkDelete($ids);
+
+            // Transaction ends.
+            DB::commit();
+        } catch (Exception $e) {
+            // Rollback
+            DB::rollBack();
             throw $e;
         }
     }

@@ -94,8 +94,30 @@ class TimelineController extends Controller
             // Get all request parameters.
             $inputs = $request->all();
 
-            // Create a new record of the timeline.
+            // Update timelines and life_events.
             $timeline = $this->timelineService->update($timeline_id, $inputs);
+
+            return response()->json($timeline);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete the record of the timeline.
+     *
+     * @param Request $request
+     * @param integer $timeline_id
+     * @return JsonResponse
+     */
+    public function delete(Request $request, int $timeline_id): JsonResponse
+    {
+        try {
+            // Get all request parameters.
+            $inputs = $request->all();
+
+            // Delete timelines and life_events.
+            $timeline = $this->timelineService->delete($timeline_id, $inputs);
 
             return response()->json($timeline);
         } catch (Exception $e) {

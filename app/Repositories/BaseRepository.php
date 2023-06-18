@@ -206,4 +206,52 @@ class BaseRepository
             throw $e;
         }
     }
+
+    /**
+     * Delete the data.
+     *
+     * @param integer $id
+     * @param string|null $updated_at
+     * @return void
+     */
+    public function delete(int $id, ?string $updated_at = null): void
+    {
+        try {
+            // Retrieve the data by id.
+            $data = $this->model->find($id);
+
+            // Exclusive check if $updated_at is not null.
+            if ($updated_at) {
+                if ($updated_at !== Carbon::create($data->updated_at)->format('Y/m/d H:i:s')) {
+                    // Throw ExclusiveLockException if these updated_at do not match.
+                    throw new ExclusiveLockException();
+                }
+            }
+
+            // Delete the data.
+            $data->delete();
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Bulk Delete
+     * ** Delete each data within a loop as data would not be a lot.
+     *
+     * @param array $attributes
+     * @return void
+     */
+    public function bulkDelete(array $attributes): void
+    {
+        foreach ($attributes as $data) {
+            // Skip if $data does not have an id.
+            if (!isset($data['id'])) {
+                continue;
+            }
+
+            // Delete the data.
+            $this->delete($data['id'], $data['updated_at'] ?? null);
+        }
+    }
 }
