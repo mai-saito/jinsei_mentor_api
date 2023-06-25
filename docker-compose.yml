@@ -4,6 +4,8 @@ services:
   nginx:
     container_name: jm_nginx
     build: ./docker/nginx
+    environment:
+      TZ: Asia/Tokyo
     ports:
       - '8000:80'
     volumes:
@@ -14,6 +16,8 @@ services:
   app:
     container_name: jm_app
     build: ./docker/php
+    environment:
+      TZ: Asia/Tokyo
     volumes:
       - ./docker/php/php.ini:/usr/local/php/php.ini
       - .:/var/www/html/jinsei_mentor

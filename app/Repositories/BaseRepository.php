@@ -104,11 +104,14 @@ class BaseRepository
                     // Get 'updated_at' of the registed data record.
                     $updated_at = clone $query->first('updated_at')->updated_at;
 
-                    if ($updated_at !== $attributes['updated_at']) {
+                    if ($updated_at->format('Y-m-d H:i:s') !== $attributes['updated_at']) {
                         // Throw ExclusiveLockException if these updated_at do not match.
                         throw new ExclusiveLockException();
                     }
                 }
+
+                // Set current timestamp for updated_at.
+                $attributes['updated_at'] = Carbon::now();
 
                 // Update the data record with $attributes.
                 return $query->update($attributes);
@@ -191,13 +194,6 @@ class BaseRepository
                         unset($data[$index][$key]);
                     }
                 }
-
-                foreach ($columns as $column) {
-                    // Set timestamp for created_at/updated_at.
-                    if ($column === 'created_at' || $column === 'updated_at') {
-                        $data[$index][$column] = $timestamp;
-                    }
-                }
             }
 
             // Upsert all data.
@@ -222,7 +218,7 @@ class BaseRepository
 
             // Exclusive check if $updated_at is not null.
             if ($updated_at) {
-                if ($updated_at !== Carbon::create($data->updated_at)->format('Y/m/d H:i:s')) {
+                if ($updated_at !== $data->updated_at->format('Y-m-d H:i:s')) {
                     // Throw ExclusiveLockException if these updated_at do not match.
                     throw new ExclusiveLockException();
                 }
